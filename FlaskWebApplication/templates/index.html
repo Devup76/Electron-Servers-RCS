@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Control</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #4a235a; /* Dark purple background color */
+            color: #ecf0f1; /* Light text color */
+        }
+        h1 {
+            color: #ecf0f1; /* Light header color */
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #3498db; /* Blue button color */
+            color: #ecf0f1; /* Light text color */
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+        #server-status {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #ecf0f1; /* Light text color */
+        }
+        #notification {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #e74c3c; /* Red color for notifications */
+        }
+        #server-status-tab {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #3498db; /* Blue color for tab */
+            color: #ecf0f1; /* Light text color */
+            border: none;
+            border-radius: 5px;
+        }
+        #server-status-tab:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+        .status-circle {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .online { background-color: #2ecc71; } /* Green color for online */
+        .offline { background-color: #e74c3c; } /* Red color for offline */
+    </style>
+</head>
+<body>
+    <h1>Minecraft Server Control</h1>
+    <button id="server-status-tab" onclick="checkServerStatus()">Server Status</button>
+    <div id="server-status-container"></div>
+    <p id="server-status"></p>
+    <form id="server-form">
+        <button type="button" onclick="runServer()">Run Server</button>
+        <button type="button" onclick="stopServer()">Stop Server</button>
+    </form>
+    <p id="notification"></p>
+    <div id="dark-mode-container">
+        <!-- Dark mode content goes here -->
+    </div>
+    <script>
+        async function checkServerStatus() {
+            const response = await fetch('/check-server-status', { method: 'GET' });
+            const result = await response.json();
+            
+            const container = document.getElementById('server-status-container');
+            container.innerHTML = ''; // Clear previous content
+
+            const statusText = document.createElement('p');
+            statusText.id = 'server-status';
+            statusText.innerText = 'Server Status: ' + (result.server_running ? 'ONLINE' : 'OFFLINE');
+            container.appendChild(statusText);
+
+            const statusCircle = document.createElement('div');
+            statusCircle.className = 'status-circle ' + (result.server_running ? 'online' : 'offline');
+            container.appendChild(statusCircle);
+        }
+
+        async function runServer() {
+            const response = await fetch('/run-server', { method: 'POST' });
+            const result = await response.json();
+            document.getElementById('server-status').innerText = result.message;
+            document.getElementById('notification').innerText = result.notification;
+        }
+
+        async function stopServer() {
+            const response = await fetch('/stop-server', { method: 'POST' });
+            const result = await response.json();
+            document.getElementById('server-status').innerText = result.message;
+            document.getElementById('notification').innerText = result.notification;
+        }
+    </script>
+</body>
+</html>
